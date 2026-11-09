@@ -14,6 +14,11 @@ import ChatWidget from "@/components/ChatWidget";
 
 const queryClient = new QueryClient();
 
+// El chatbot Jowi necesita un backend (/api/chat) y una API key (OpenAI/Groq).
+// Está desactivado por defecto; para reactivarlo define VITE_ENABLE_CHAT=true
+// en las variables de entorno de Vercel (y configura OPENAI_API_KEY).
+const CHAT_ENABLED = import.meta.env.VITE_ENABLE_CHAT === "true";
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -32,8 +37,8 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
 
-        {/* ✅ Chat flotante global */}
-        <ChatWidget />
+        {/* Chat flotante global (desactivado temporalmente, ver CHAT_ENABLED) */}
+        {CHAT_ENABLED && <ChatWidget />}
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
