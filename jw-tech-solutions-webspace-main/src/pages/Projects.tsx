@@ -4,102 +4,92 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import Navbar from "@/components/Navbar";
+import { useLanguage } from "@/i18n/LanguageContext";
+
+type ProjectStatus = "completed" | "inDevelopment";
+
+// Datos que NO dependen del idioma. Los textos (título, descripción,
+// características) están en src/i18n/*.ts y se unen por `id`.
+const PROJECTS_META: Record<
+  number,
+  {
+    category: string;
+    technologies: string[];
+    client: string;
+    year: string;
+    status: ProjectStatus;
+    link: string;
+  }
+> = {
+  1: {
+    category: "ecommerce",
+    technologies: ["React", "Node.js", "PostgreSQL", "Stripe"],
+    client: "TechStore Corp",
+    year: "2024",
+    status: "completed",
+    link: "#",
+  },
+  2: {
+    category: "mobile",
+    technologies: ["React Native", "Firebase", "Google Maps", "Push Notifications"],
+    client: "Delivery Express",
+    year: "2024",
+    status: "inDevelopment",
+    link: "#",
+  },
+  3: {
+    category: "enterprise",
+    technologies: ["Vue.js", "Laravel", "MySQL", "Docker"],
+    client: "Industrias ABC",
+    year: "2023",
+    status: "completed",
+    link: "#",
+  },
+  4: {
+    category: "web",
+    technologies: ["Next.js", "Prisma", "AWS", "WebRTC"],
+    client: "EduTech Solutions",
+    year: "2023",
+    status: "completed",
+    link: "#",
+  },
+  5: {
+    category: "mobile",
+    technologies: ["Flutter", "Blockchain", "AI/ML", "Biometric Auth"],
+    client: "NeoBank",
+    year: "2024",
+    status: "inDevelopment",
+    link: "#",
+  },
+  6: {
+    category: "web",
+    technologies: ["React", "GraphQL", "MongoDB", "Microservices"],
+    client: "B2B Connect",
+    year: "2023",
+    status: "completed",
+    link: "#",
+  },
+};
 
 const Projects = () => {
-  const [selectedCategory, setSelectedCategory] = useState("Todos");
+  const { t } = useLanguage();
+  const p = t.projects;
 
-  const categories = ["Todos", "Web", "Móvil", "E-commerce", "Empresarial"];
+  // id de categoría (independiente del idioma); "all" = sin filtro
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
-  const projects = [
-    {
-      id: 1,
-      title: "E-commerce TechStore",
-      description: "Plataforma de comercio electrónico completa con gestión de inventario, pagos y analytics en tiempo real.",
-      category: "E-commerce",
-      // image eliminada por referencia a 'lovable-uploads'
-      technologies: ["React", "Node.js", "PostgreSQL", "Stripe"],
-      client: "TechStore Corp",
-      year: "2024",
-      status: "Completado",
-      features: ["Carrito de compras", "Pagos seguros", "Panel administrativo", "Analytics"],
-      link: "#"
-    },
-    {
-      id: 2,
-      title: "App Delivery Express",
-      description: "Aplicación móvil para delivery de comida con tracking en tiempo real y sistema de calificaciones.",
-      category: "Móvil",
-      // image eliminada por referencia a 'lovable-uploads'
-      technologies: ["React Native", "Firebase", "Google Maps", "Push Notifications"],
-      client: "Delivery Express",
-      year: "2024",
-      status: "En desarrollo",
-      features: ["Tracking GPS", "Notificaciones", "Calificaciones", "Chat"],
-      link: "#"
-    },
-    {
-      id: 3,
-      title: "Sistema ERP Industrial",
-      description: "Sistema empresarial para gestión de recursos, inventario, ventas y reportes analíticos.",
-      category: "Empresarial",
-      // image eliminada por referencia a 'lovable-uploads'
-      technologies: ["Vue.js", "Laravel", "MySQL", "Docker"],
-      client: "Industrias ABC",
-      year: "2023",
-      status: "Completado",
-      features: ["Gestión inventario", "CRM", "Reportes", "Facturación"],
-      link: "#"
-    },
-    {
-      id: 4,
-      title: "Portal Educativo Online",
-      description: "Plataforma de educación virtual con cursos, evaluaciones y seguimiento de progreso estudiantil.",
-      category: "Web",
-      // image eliminada por referencia a 'lovable-uploads'
-      technologies: ["Next.js", "Prisma", "AWS", "WebRTC"],
-      client: "EduTech Solutions",
-      year: "2023",
-      status: "Completado",
-      features: ["Videoconferencias", "Evaluaciones", "Certificados", "Dashboard"],
-      link: "#"
-    },
-    {
-      id: 5,
-      title: "App Fintech Banking",
-      description: "Aplicación bancaria móvil con transferencias, inversiones y análisis financiero personal.",
-      category: "Móvil",
-      // image eliminada por referencia a 'lovable-uploads'
-      technologies: ["Flutter", "Blockchain", "AI/ML", "Biometric Auth"],
-      client: "NeoBank",
-      year: "2024",
-      status: "En desarrollo",
-      features: ["Transferencias", "Inversiones", "Analytics", "Seguridad"],
-      link: "#"
-    },
-    {
-      id: 6,
-      title: "Marketplace B2B",
-      description: "Plataforma B2B para conectar proveedores con empresas, con sistema de cotizaciones y contratos.",
-      category: "Web",
-      // image eliminada por referencia a 'lovable-uploads'
-      technologies: ["React", "GraphQL", "MongoDB", "Microservices"],
-      client: "B2B Connect",
-      year: "2023",
-      status: "Completado",
-      features: ["Cotizaciones", "Contratos", "Marketplace", "Ratings"],
-      link: "#"
-    }
-  ];
+  const projects = p.items.map((item) => ({ ...item, ...PROJECTS_META[item.id] }));
 
-  const filteredProjects = selectedCategory === "Todos"
-    ? projects
-    : projects.filter(project => project.category === selectedCategory);
+  const filteredProjects =
+    selectedCategory === "all"
+      ? projects
+      : projects.filter((project) => project.category === selectedCategory);
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: ProjectStatus) => {
     switch (status) {
-      case "Completado":
+      case "completed":
         return "bg-accent";
-      case "En desarrollo":
+      case "inDevelopment":
         return "bg-primary";
       default:
         return "bg-muted";
@@ -114,10 +104,10 @@ const Projects = () => {
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl md:text-6xl font-bold mb-6">
-            🛠️Nuestros Proyectos:
+            {p.heroTitle}
           </h1>
           <p className="text-xl md:text-2xl text-white/90 max-w-3xl mx-auto">
-            Descubre los proyectos exitosos que hemos desarrollado para nuestros clientes:
+            {p.heroSubtitle}
           </p>
         </div>
       </section>
@@ -127,14 +117,14 @@ const Projects = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-center gap-4 flex-wrap">
             <Filter className="h-5 w-5 text-muted-foreground" />
-            {categories.map((category) => (
+            {p.categories.map((category) => (
               <Button
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                onClick={() => setSelectedCategory(category)}
-                className={selectedCategory === category ? "bg-primary" : ""}
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                onClick={() => setSelectedCategory(category.id)}
+                className={selectedCategory === category.id ? "bg-primary" : ""}
               >
-                {category}
+                {category.label}
               </Button>
             ))}
           </div>
@@ -155,7 +145,7 @@ const Projects = () => {
                   <Badge
                     className={`absolute top-4 right-4 ${getStatusColor(project.status)} text-white`}
                   >
-                    {project.status}
+                    {p.status[project.status]}
                   </Badge>
                 </div>
 
@@ -189,7 +179,7 @@ const Projects = () => {
 
                     {/* Technologies */}
                     <div>
-                      <p className="text-sm font-medium text-foreground mb-2">Tecnologías:</p>
+                      <p className="text-sm font-medium text-foreground mb-2">{p.technologies}</p>
                       <div className="flex flex-wrap gap-2">
                         {project.technologies.map((tech, index) => (
                           <Badge key={index} variant="secondary" className="text-xs">
@@ -201,7 +191,7 @@ const Projects = () => {
 
                     {/* Features */}
                     <div>
-                      <p className="text-sm font-medium text-foreground mb-2">Características:</p>
+                      <p className="text-sm font-medium text-foreground mb-2">{p.features}</p>
                       <ul className="text-xs text-muted-foreground space-y-1">
                         {project.features.slice(0, 3).map((feature, index) => (
                           <li key={index} className="flex items-center">
@@ -210,7 +200,7 @@ const Projects = () => {
                           </li>
                         ))}
                         {project.features.length > 3 && (
-                          <li className="text-primary">+{project.features.length - 3} más...</li>
+                          <li className="text-primary">{p.moreFeatures(project.features.length - 3)}</li>
                         )}
                       </ul>
                     </div>
@@ -219,7 +209,7 @@ const Projects = () => {
                       className="w-full bg-tech-gradient hover:opacity-90 transition-opacity group mt-4"
                       onClick={() => window.open(project.link, '_blank')}
                     >
-                      Ver Proyecto
+                      {p.viewProject}
                       <ExternalLink className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </div>
@@ -236,20 +226,19 @@ const Projects = () => {
           <div className="grid md:grid-cols-4 gap-8 text-center">
             <div>
               <div className="text-4xl font-bold text-primary mb-2">10+</div>
-              <div className="text-muted-foreground">Proyectos Completados</div>
+              <div className="text-muted-foreground">{p.stats.completed}</div>
             </div>
             <div>
               <div className="text-4xl font-bold text-accent mb-2">98%</div>
-              <div className="text-muted-foreground">Satisfacción Cliente</div>
+              <div className="text-muted-foreground">{p.stats.satisfaction}</div>
             </div>
             <div>
               <div className="text-4xl font-bold text-primary mb-2">24/7</div>
-              <div className="text-muted-foreground">Soporte Técnico</div>
+              <div className="text-muted-foreground">{p.stats.support}</div>
             </div>
             <div>
               <div className="text-4xl font-bold text-accent mb-2">10+</div>
-              <div className="text-muted-foreground">Tecnicos Profesionales Disponibles
-</div>
+              <div className="text-muted-foreground">{p.stats.technicians}</div>
             </div>
           </div>
         </div>

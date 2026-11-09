@@ -2,6 +2,7 @@ import Navbar from "@/components/Navbar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Users, Target, Lightbulb, Award } from "lucide-react";
 import { motion, type Variants } from "framer-motion";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const EASE: [number, number, number, number] = [0.2, 0.8, 0.2, 1];
 
@@ -33,52 +34,16 @@ const PosterBackground = () => (
 );
 
 const About = () => {
+  const { t } = useLanguage();
+  const a = t.about;
+
   const values = [
-    {
-      icon: <Target className="h-6 w-6 text-primary" />,
-      title: "Misión",
-      description:
-        "Impulsar la transformación digital de las empresas con soluciones innovadoras, eficientes y personalizadas que generen valor real.",
-    },
-    {
-      icon: <Lightbulb className="h-6 w-6 text-primary" />,
-      title: "Visión",
-      description:
-        "Ser una empresa líder en soluciones tecnológicas, reconocida por excelencia, creatividad e impacto en el crecimiento de nuestros clientes.",
-    },
-    {
-      icon: <Award className="h-6 w-6 text-primary" />,
-      title: "Valores",
-      description:
-        "Excelencia, innovación, compromiso, integridad y enfoque humano en cada proyecto que construimos.",
-    },
+    { icon: <Target className="h-6 w-6 text-primary" />, ...a.mission },
+    { icon: <Lightbulb className="h-6 w-6 text-primary" />, ...a.vision },
+    { icon: <Award className="h-6 w-6 text-primary" />, ...a.values },
   ];
 
-  const team = [
-    {
-      name: "Jamil Williams",
-      role: "CEO & Fundador",
-      description:
-        "Especialista en desarrollo Full-stack, metodologías ágiles y liderazgo tecnológico.",
-    },
-    {
-      name: "Joshua Williams",
-      role: "Lead Developer",
-      description: "Especialista en desarrollo full-stack y metodologías ágiles.",
-    },
-    {
-      name: "Genesis Diaz",
-      role: "Lead Designer",
-      description:
-        "Lidera identidades visuales sólidas y coherentes que elevan el valor de cada marca.",
-    },
-    {
-      name: "Carlos Miguel",
-      role: "Lead Developer",
-      description:
-        "Experto en arquitectura de software y tecnologías emergentes.",
-    },
-  ];
+  const team = a.team;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -110,7 +75,7 @@ const About = () => {
                 variants={item}
                 className="mt-5 text-4xl md:text-6xl font-extrabold leading-[1.05] text-white"
               >
-                Conoce a JW Tech Solutions 🚀:
+                {a.heroTitle}
               </motion.h1>
 
               <motion.p
@@ -141,14 +106,14 @@ const About = () => {
                   {/* 👇 Cambia el src por la imagen que usas en el Home */}
                   <img
                     src="/home/poster.jpg"
-                    alt="JW Tech Solutions Poster"
+                    alt={a.posterAlt}
                     className="h-full w-full object-cover"
                   />
                 </div>
 
                 <div className="px-5 py-4 border-t border-white/10">
                   <p className="text-sm text-white/75">
-                    YOUTUBE CHANNEL COMING SOON..
+                    {a.youtubeSoon}
                   </p>
                 </div>
               </div>
@@ -174,39 +139,28 @@ const About = () => {
           variants={item}
           className="text-3xl md:text-4xl font-bold text-white"
         >
-          El Futuro de la Tecnología:
+          {a.historyTitle}
         </motion.h2>
 
         <motion.p
           variants={item}
           className="mt-5 text-base md:text-lg text-white/75 leading-relaxed"
         >
-         Vivimos en una era donde todo está conectado, donde una empresa puede
-          operar de forma autónoma desde la palma de una mano. En este contexto, la
-          tecnología no es algo que deba generar miedo ni preocupación, sino una
-          herramienta que, bien comprendida, abre un universo infinito de
-          oportunidades. 
+          {a.historyP1}
         </motion.p>
 
         <motion.p
           variants={item}
           className="mt-5 text-base md:text-lg text-white/75 leading-relaxed"
         >
-          En JW TECH cultivamos una cultura basada en la innovación y el aprendizaje
-          constante. No nos limitamos al desarrollo de software como un fin en sí
-          mismo; aspiramos a ser una de las empresas de soluciones tecnológicas más
-          completas del mercado. Nuestro camino nos lleva más allá, hasta la
-          creación de modelos de inteligencia artificial plenamente funcionales y
-          diseñados a la medida de cada empresa.
+          {a.historyP2}
         </motion.p>
 
         <motion.p
           variants={item}
           className="mt-5 text-base md:text-lg text-white/75 leading-relaxed"
         >
-          Creamos sistemas personalizados, escalables y seguros que evolucionan con
-          tus necesidades. La tecnología no es un lujo: es una inversión
-          inteligente.
+          {a.historyP3}
         </motion.p>
       </motion.div>
 
@@ -232,14 +186,14 @@ const About = () => {
           <div className="aspect-[16/9] w-full bg-black/20">
             <img
               src="/home/poster2.jpg"
-              alt="JW Tech Solutions Poster"
+              alt={a.posterAlt}
               className="h-full w-full object-cover"
             />
           </div>
 
           <div className="px-5 py-4 border-t border-white/10">
             <p className="text-sm text-white/75">
-              Soluciones digitales listas para escalar.
+              {a.historyCaption}
             </p>
           </div>
         </div>
@@ -264,13 +218,13 @@ const About = () => {
               variants={item}
               className="text-3xl md:text-4xl font-bold text-white"
             >
-              Nuestros Valores
+              {a.valuesTitle}
             </motion.h2>
             <motion.p
               variants={item}
               className="mt-3 text-base md:text-lg text-white/70 max-w-2xl mx-auto"
             >
-              Lo que creemos guía lo que creamos.
+              {a.valuesSubtitle}
             </motion.p>
           </motion.div>
 
@@ -315,23 +269,23 @@ const About = () => {
               variants={item}
               className="text-3xl md:text-4xl font-bold text-white"
             >
-              Nuestro Equipo
+              {a.teamTitle}
             </motion.h2>
             <motion.p
               variants={item}
               className="mt-3 text-base md:text-lg text-white/70 max-w-2xl mx-auto"
             >
-              Personas apasionadas, experiencia comprobada y compromiso real con tu
-              crecimiento.
+              {a.teamSubtitle}
             </motion.p>
           </motion.div>
 
+          {/* flex + wrap centrado: con 5 miembros la última fila queda centrada */}
           <motion.div
             variants={container}
             initial="hidden"
             whileInView="show"
             viewport={{ once: true, amount: 0.2 }}
-            className="mt-10 grid md:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="mt-10 flex flex-wrap justify-center gap-6"
           >
             {team.map((m) => (
               <motion.div
@@ -339,6 +293,7 @@ const About = () => {
                 variants={item}
                 whileHover={{ y: -6 }}
                 transition={{ duration: 0.25, ease: EASE }}
+                className="w-full md:w-[calc(50%-12px)] lg:w-[calc(25%-18px)]"
               >
                 <Card className="h-full border border-white/12 bg-white/5 backdrop-blur-md shadow-xl hover:shadow-2xl transition-all duration-300">
                   <CardContent className="p-7">

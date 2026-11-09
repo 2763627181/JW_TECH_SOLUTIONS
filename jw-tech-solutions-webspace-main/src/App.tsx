@@ -11,6 +11,7 @@ import Contact from "./pages/Contact";
 import NotFound from "./pages/NotFound";
 import ScrollToTop from "./components/ScrollToTop";
 import ChatWidget from "@/components/ChatWidget";
+import { LanguageProvider } from "@/i18n/LanguageContext";
 
 const queryClient = new QueryClient();
 
@@ -21,26 +22,28 @@ const CHAT_ENABLED = import.meta.env.VITE_ENABLE_CHAT === "true";
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+    <LanguageProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
 
-      <BrowserRouter>
-        <ScrollToTop />
+        <BrowserRouter>
+          <ScrollToTop />
 
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/nosotros" element={<About />} />
-          <Route path="/servicios" element={<Services />} />
-          <Route path="/proyectos" element={<Projects />} />
-          <Route path="/contacto" element={<Contact />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/nosotros" element={<About />} />
+            <Route path="/servicios" element={<Services />} />
+            <Route path="/proyectos" element={<Projects />} />
+            <Route path="/contacto" element={<Contact />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
 
-        {/* Chat flotante global (desactivado temporalmente, ver CHAT_ENABLED) */}
-        {CHAT_ENABLED && <ChatWidget />}
-      </BrowserRouter>
-    </TooltipProvider>
+          {/* Chat flotante global (desactivado temporalmente, ver CHAT_ENABLED) */}
+          {CHAT_ENABLED && <ChatWidget />}
+        </BrowserRouter>
+      </TooltipProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

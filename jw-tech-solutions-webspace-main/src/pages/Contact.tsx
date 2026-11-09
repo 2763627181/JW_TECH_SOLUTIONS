@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import emailjs from "@emailjs/browser";
 import { motion, type Variants, cubicBezier } from "framer-motion";
@@ -6,6 +6,7 @@ import { Mail, Phone, MapPin, Clock, Send, CheckCircle } from "lucide-react";
 
 import Navbar from "@/components/Navbar";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,11 +41,22 @@ const PosterBackground = () => (
 const glassCard =
   "border border-white/12 bg-white/5 backdrop-blur-md shadow-2xl";
 
+const CONTACT_ICONS = [
+  <Mail key="mail" className="h-6 w-6 text-primary" />,
+  <Phone key="phone" className="h-6 w-6 text-primary" />,
+  <MapPin key="map" className="h-6 w-6 text-primary" />,
+  <Clock key="clock" className="h-6 w-6 text-primary" />,
+];
+
 const Contact = () => {
   const [searchParams] = useSearchParams();
   const { toast } = useToast();
+  const { t } = useLanguage();
+  const c = t.contact;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // `service` guarda el id de la opción (no el texto) para que la selección
+  // se conserve y se traduzca al cambiar de idioma.
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -54,60 +66,30 @@ const Contact = () => {
     message: "",
   });
 
+  // Si llegamos desde una tarjeta de Servicios: ?servicio=<id de categoría>
+  // (también acepta un texto libre, por si hay enlaces antiguos).
+  const serviceParam = searchParams.get("servicio");
+  const cameFromServiceCard = Boolean(serviceParam);
+  const cardServiceLabel =
+    t.servicesCatalog.find((s) => s.category === serviceParam)?.title ?? serviceParam ?? "";
+
+  // Mensaje precargado: se actualiza al cambiar de idioma, pero nunca pisa
+  // lo que el usuario ya haya escrito/editado.
+  const lastPrefill = useRef("");
   useEffect(() => {
-    const servicioDesdeURL = searchParams.get("servicio");
-    if (servicioDesdeURL) {
-      setFormData((prev) => ({
-        ...prev,
-        service: servicioDesdeURL,
-        message: `Hola, estoy interesado en el servicio de ${servicioDesdeURL}. Me gustaría recibir más información.`,
-      }));
-    }
-  }, [searchParams]);
+    if (!cameFromServiceCard) return;
+    const next = c.prefillMessage(cardServiceLabel);
+    // Capturar el valor anterior ANTES de actualizar el ref: React ejecuta la
+    // función de setFormData más tarde, cuando el ref ya tendría el valor nuevo.
+    const previousPrefill = lastPrefill.current;
+    lastPrefill.current = next;
+    setFormData((prev) =>
+      prev.message === previousPrefill ? { ...prev, message: next } : prev
+    );
+  }, [cameFromServiceCard, cardServiceLabel, c]);
 
-  const contactInfo = useMemo(
-    () => [
-      {
-        icon: <Mail className="h-6 w-6 text-primary" />,
-        title: "Email",
-        value: "jwtechdr@gmail.com",
-        subtitle: "Respuesta en menos de 24 horas",
-      },
-      {
-        icon: <Phone className="h-6 w-6 text-primary" />,
-        title: "Teléfono",
-        value: "+1 (890)-761-2875",
-        subtitle: "Soporte 24/7",
-      },
-      {
-        icon: <MapPin className="h-6 w-6 text-primary" />,
-        title: "Oficina",
-        value: "Santo Domingo, RD",
-        subtitle: "Citas disponibles",
-      },
-      {
-        icon: <Clock className="h-6 w-6 text-primary" />,
-        title: "Horarios",
-        value: "Lun - Vie: 24 horas",
-        subtitle: "Sáb: 10:00 AM - 2:00 PM",
-      },
-    ],
-    []
-  );
-
-  const services = useMemo(
-    () => [
-      "Desarrollo Web",
-      "Aplicaciones Móviles",
-      "Software Personalizado",
-      "Consultoría Técnica",
-      "E-commerce",
-      "Otro",
-    ],
-    []
-  );
-
-  const cameFromServiceCard = Boolean(searchParams.get("servicio"));
+  const contactInfo = c.info.map((info, i) => ({ ...info, icon: CONTACT_ICONS[i] }));
+  const services = c.serviceOptions;
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -122,12 +104,15 @@ const Contact = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    const selectedServiceLabel =
+      services.find((s) => s.id === formData.service)?.label ?? formData.service;
+
     const templateParams = {
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
       company: formData.company,
-      service: formData.service,
+      service: cameFromServiceCard ? cardServiceLabel : selectedServiceLabel,
       message: formData.message,
     };
 
@@ -140,8 +125,8 @@ const Contact = () => {
       );
 
       toast({
-        title: "¡Mensaje enviado!",
-        description: "Nos pondremos en contacto contigo pronto.",
+        title: c.toastSuccessTitle,
+        description: c.toastSuccessDescription,
       });
 
       setFormData({
@@ -154,8 +139,8 @@ const Contact = () => {
       });
     } catch (error) {
       toast({
-        title: "Ocurrió un error",
-        description: "Intenta de nuevo más tarde o usa otro medio de contacto.",
+        title: c.toastErrorTitle,
+        description: c.toastErrorDescription,
       });
       console.error("EmailJS error:", error);
     } finally {
@@ -180,7 +165,7 @@ const Contact = () => {
               >
                 <span className="text-primary">{"</>"}</span>
                 <span className="tracking-[0.25em] uppercase text-xs">
-                  CONTACTO
+                  {c.badge}
                 </span>
               </motion.div>
 
@@ -188,20 +173,20 @@ const Contact = () => {
                 variants={item}
                 className="mt-5 text-4xl md:text-6xl font-extrabold leading-[1.05] text-white"
               >
-                📞 Hablemos de tu proyecto:
+                {c.heroTitle}
               </motion.h1>
 
               <motion.p
                 variants={item}
                 className="mt-4 text-base md:text-lg text-white/75 leading-relaxed"
               >
-                ¿Tienes una idea en mente? Te ayudamos a convertirla en realidad.
+                {c.heroSubtitle}
               </motion.p>
 
               <motion.div variants={item} className="mt-7 flex flex-wrap gap-3">
                 <a href="#form">
                   <Button className="bg-primary hover:bg-primary/90 text-white">
-                    Enviar mensaje
+                    {c.sendMessage}
                     <Send className="ml-2 h-4 w-4" />
                   </Button>
                 </a>
@@ -216,7 +201,7 @@ const Contact = () => {
                     className="border-white/20 bg-white/5 text-white hover:bg-white/10"
                   >
                     <Phone className="mr-2 h-4 w-4" />
-                    Agendar llamada
+                    {c.scheduleCall}
                   </Button>
                 </a>
               </motion.div>
@@ -243,14 +228,14 @@ const Contact = () => {
                   {/* Usa una imagen 16:9 (ej: 1920x1080 o 1280x720) */}
                   <img
                     src="/home/contactospost.jpg"
-                    alt="JW Tech Solutions Contact Poster"
+                    alt={c.posterAlt}
                     className="h-full w-full object-cover"
                   />
                 </div>
 
                 <div className="px-5 py-4 border-t border-white/10">
                   <p className="text-sm text-white/75">
-                    Respuesta rápida · Presupuesto sin compromiso · Soporte
+                    {c.posterFooter}
                   </p>
                 </div>
               </div>
@@ -301,11 +286,10 @@ const Contact = () => {
                 <Card className={glassCard}>
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold text-white">
-                      Envíanos un mensaje
+                      {c.form.title}
                     </CardTitle>
                     <p className="text-white/60">
-                      Completa el formulario y te respondemos en menos de 24
-                      horas.
+                      {c.form.subtitle}
                     </p>
                   </CardHeader>
 
@@ -314,7 +298,7 @@ const Contact = () => {
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label className="text-white/80" htmlFor="name">
-                            Nombre completo: *
+                            {c.form.name}
                           </Label>
                           <Input
                             id="name"
@@ -322,13 +306,13 @@ const Contact = () => {
                             value={formData.name}
                             onChange={handleInputChange}
                             required
-                            placeholder="Tu nombre"
+                            placeholder={c.form.namePlaceholder}
                             className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                           />
                         </div>
                         <div className="space-y-2">
                           <Label className="text-white/80" htmlFor="email">
-                            Email: *
+                            {c.form.email}
                           </Label>
                           <Input
                             id="email"
@@ -337,7 +321,7 @@ const Contact = () => {
                             value={formData.email}
                             onChange={handleInputChange}
                             required
-                            placeholder="tu@email.com"
+                            placeholder={c.form.emailPlaceholder}
                             className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                           />
                         </div>
@@ -346,7 +330,7 @@ const Contact = () => {
                       <div className="grid md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                           <Label className="text-white/80" htmlFor="phone">
-                            Teléfono:
+                            {c.form.phone}
                           </Label>
                           <Input
                             id="phone"
@@ -359,14 +343,14 @@ const Contact = () => {
                         </div>
                         <div className="space-y-2">
                           <Label className="text-white/80" htmlFor="company">
-                            Empresa:
+                            {c.form.company}
                           </Label>
                           <Input
                             id="company"
                             name="company"
                             value={formData.company}
                             onChange={handleInputChange}
-                            placeholder="Empresa/Grupo/Personal"
+                            placeholder={c.form.companyPlaceholder}
                             className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                           />
                         </div>
@@ -374,14 +358,14 @@ const Contact = () => {
 
                       <div className="space-y-2">
                         <Label className="text-white/80" htmlFor="service">
-                          Servicio de interés: *
+                          {c.form.service}
                         </Label>
 
                         {cameFromServiceCard ? (
                           <Input
                             id="service"
                             name="service"
-                            value={formData.service}
+                            value={cardServiceLabel}
                             readOnly
                             className="bg-white/5 border-white/10 text-white/80 cursor-not-allowed"
                           />
@@ -395,11 +379,11 @@ const Contact = () => {
                             className="w-full px-3 py-2 rounded-md bg-white/5 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-primary"
                           >
                             <option value="" className="text-black">
-                              Selecciona un servicio
+                              {c.form.servicePlaceholder}
                             </option>
                             {services.map((s) => (
-                              <option key={s} value={s} className="text-black">
-                                {s}
+                              <option key={s.id} value={s.id} className="text-black">
+                                {s.label}
                               </option>
                             ))}
                           </select>
@@ -408,7 +392,7 @@ const Contact = () => {
 
                       <div className="space-y-2">
                         <Label className="text-white/80" htmlFor="message">
-                          Mensaje: *
+                          {c.form.message}
                         </Label>
                         <Textarea
                           id="message"
@@ -417,7 +401,7 @@ const Contact = () => {
                           onChange={handleInputChange}
                           required
                           rows={5}
-                          placeholder="Cuéntanos sobre tu proyecto…"
+                          placeholder={c.form.messagePlaceholder}
                           className="bg-white/5 border-white/10 text-white placeholder:text-white/40"
                         />
                       </div>
@@ -428,10 +412,10 @@ const Contact = () => {
                         disabled={isSubmitting}
                       >
                         {isSubmitting ? (
-                          "Enviando..."
+                          c.form.submitting
                         ) : (
                           <>
-                            Enviar mensaje
+                            {c.form.submit}
                             <Send className="ml-2 h-4 w-4" />
                           </>
                         )}
@@ -475,21 +459,15 @@ const Contact = () => {
                 <Card className={glassCard}>
                   <CardHeader>
                     <CardTitle className="text-xl font-bold text-white">
-                      ¿Por qué elegirnos?
+                      {c.whyTitle}
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-3">
-                      {[
-                        "Respuesta rápida en menos de 24 horas.",
-                        "Presupuestos sin compromiso.",
-                        "Equipo especializado y certificado.",
-                        "Soporte técnico 24/7.",
-                        "Garantía en todos nuestros proyectos.",
-                      ].map((t) => (
-                        <li key={t} className="flex items-center text-sm">
+                      {c.whyItems.map((text) => (
+                        <li key={text} className="flex items-center text-sm">
                           <CheckCircle className="h-4 w-4 text-primary mr-3 flex-shrink-0" />
-                          <span className="text-white/70">{t}</span>
+                          <span className="text-white/70">{text}</span>
                         </li>
                       ))}
                     </ul>
@@ -504,7 +482,7 @@ const Contact = () => {
                           className="border-white/20 bg-white/5 text-white hover:bg-white/10"
                         >
                           <Mail className="mr-2 h-4 w-4" />
-                          Escribir correo
+                          {c.writeEmail}
                         </Button>
                       </a>
 
@@ -516,7 +494,7 @@ const Contact = () => {
                       >
                         <Button className="bg-primary hover:bg-primary/90 text-white">
                           <Phone className="mr-2 h-4 w-4" />
-                          Agendar llamada
+                          {c.scheduleCall}
                         </Button>
                       </a>
                     </div>
@@ -533,11 +511,10 @@ const Contact = () => {
         <div className="max-w-5xl mx-auto px-6">
           <div className="rounded-3xl border border-border bg-muted/30 p-8 md:p-10 text-center">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground">
-              ¿Prefieres una llamada directa?
+              {c.finalTitle}
             </h2>
             <p className="mt-2 text-muted-foreground">
-              Agenda una consulta gratuita de 30 minutos para discutir tu
-              proyecto.
+              {c.finalSubtitle}
             </p>
 
             <div className="mt-6 flex justify-center">
@@ -548,7 +525,7 @@ const Contact = () => {
               >
                 <Button size="lg" className="bg-primary hover:bg-primary/90">
                   <Phone className="mr-2 h-5 w-5" />
-                  Agendar Llamada
+                  {c.finalCta}
                 </Button>
               </a>
             </div>

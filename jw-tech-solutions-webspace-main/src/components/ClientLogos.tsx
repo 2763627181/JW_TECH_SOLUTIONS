@@ -1,10 +1,12 @@
 import { motion } from "framer-motion";
-import { siteContent } from "@/config/siteContent";
+import { clients } from "@/config/siteContent";
+import { useLanguage } from "@/i18n/LanguageContext";
 import Reveal from "@/components/Reveal";
 import { Building2 } from "lucide-react";
 
 export default function ClientLogos() {
-  const clients = siteContent.clients;
+  const { t } = useLanguage();
+  const copy = t.clients;
 
   // Duplicamos los clientes para crear un loop infinito suave
   const duplicatedClients = [...clients, ...clients];
@@ -26,15 +28,14 @@ export default function ClientLogos() {
             <div className="inline-flex items-center justify-center gap-2 mb-4">
               <Building2 className="h-5 w-5 text-[hsl(var(--primary))]" />
               <span className="text-xs font-semibold tracking-[0.2em] uppercase text-[hsl(var(--primary))]">
-                Portafolio de Clientes
+                {copy.badge}
               </span>
             </div>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-extrabold mb-4 tracking-tight">
-              Empresas que Confían en Nosotros
+              {copy.title}
             </h2>
             <p className="text-muted-foreground max-w-3xl mx-auto text-base md:text-lg leading-relaxed">
-              Nos enorgullece colaborar con organizaciones líderes que han elegido nuestras soluciones tecnológicas para impulsar su crecimiento digital. 
-              A continuación, presentamos una selección de nuestros clientes más destacados.
+              {copy.description}
             </p>
           </div>
         </Reveal>
@@ -89,7 +90,7 @@ export default function ClientLogos() {
               whileHover={{ scale: 1.05, y: -2 }}
               whileTap={{ scale: 0.98 }}
             >
-              <span>Iniciar Proyecto</span>
+              <span>{copy.cta}</span>
               <svg
                 className="w-4 h-4"
                 fill="none"

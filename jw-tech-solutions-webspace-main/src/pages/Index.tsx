@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { siteContent } from "@/config/siteContent";
+import { useEffect, useState } from "react";
+import { heroImages } from "@/config/siteContent";
+import { useLanguage } from "@/i18n/LanguageContext";
 import Reveal from "@/components/Reveal";
 import { Button } from "@/components/ui/button";
 import { Code, Zap,ArrowRight, Check, Sparkles } from "lucide-react";
@@ -10,9 +11,11 @@ import ClientLogos from "@/components/ClientLogos";
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 
+const images = heroImages.filter(Boolean);
+
 export default function Index() {
-  const { home } = siteContent;
-  const images = useMemo(() => home.heroImages?.filter(Boolean) ?? [], [home.heroImages]);
+  const { t } = useLanguage();
+  const home = t.home;
   const [i, setI] = useState(0);
 
   useEffect(() => {
@@ -71,8 +74,8 @@ export default function Index() {
                     asChild
                     className="group bg-[hsl(var(--primary))] text-white hover:opacity-95 shadow-[0_14px_45px_hsl(var(--primary)/0.22)]"
                   >
-                    <Link to={home.primaryCta.href}>
-                      {home.primaryCta.label}
+                    <Link to="/contacto">
+                      {home.primaryCta}
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                     </Link>
                   </Button>
@@ -82,7 +85,7 @@ export default function Index() {
   variant="outline"
   className="border-white/25 text-white bg-white/5 hover:bg-white/10 hover:text-white"
 >
-  <a href={home.secondaryCta.href}>{home.secondaryCta.label}</a>
+  <Link to="/servicios">{home.secondaryCta}</Link>
 </Button>
                 </div>
               </Reveal>
@@ -151,7 +154,7 @@ export default function Index() {
                         className={`h-2.5 w-2.5 rounded-full transition ${
                           idx === i ? "bg-[hsl(var(--primary))]" : "bg-white/20 hover:bg-white/30"
                         }`}
-                        aria-label={`Slide ${idx + 1}`}
+                        aria-label={`${home.slideLabel} ${idx + 1}`}
                       />
                     ))}
                   </div>
@@ -173,20 +176,20 @@ export default function Index() {
         <Reveal>
           <div className="flex items-end justify-between gap-6 flex-wrap">
             <div>
-              <h2 className="text-2xl md:text-3xl font-extrabold">Servicios</h2>
+              <h2 className="text-2xl md:text-3xl font-extrabold">{home.servicesTitle}</h2>
               <p className="mt-2 text-muted-foreground">
-                Soluciones modernas con estética premium, animaciones y rendimiento real.
+                {home.servicesSubtitle}
               </p>
             </div>
 
             <Button asChild variant="outline" className="border-border">
-              <Link to="/servicios">Ver todos</Link>
+              <Link to="/servicios">{home.viewAll}</Link>
             </Button>
           </div>
         </Reveal>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {siteContent.services.map((s, idx) => (
+          {home.services.map((s, idx) => (
             <motion.div
               key={s.title}
               initial={{ opacity: 0, y: 18 }}
@@ -223,7 +226,7 @@ export default function Index() {
                 <div className="mt-5">
                   <Button asChild className="w-full bg-[hsl(var(--primary))] text-white hover:opacity-95">
                     <Link to="/contacto">
-                      Cotizar <ArrowRight className="ml-2 h-4 w-4" />
+                      {home.quote} <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
                 </div>

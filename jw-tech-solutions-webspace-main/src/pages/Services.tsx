@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { siteContent } from "@/config/siteContent";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
 import { Link } from "react-router-dom";
@@ -16,8 +16,6 @@ import {
   Shield,
   Palette,
 } from "lucide-react";
-
-type Category = (typeof siteContent.servicesPage.categories)[number];
 
 const ease = [0.2, 0.8, 0.2, 1] as const;
 
@@ -41,14 +39,19 @@ function iconByCategory(category: string) {
 }
 
 export default function Services() {
-  const { servicesPage } = siteContent;
-  const catalog = siteContent.servicesCatalog ?? [];
-  const process = siteContent.servicesProcess ?? [];
+  const { t } = useLanguage();
+  const servicesPage = t.servicesPage;
+  const catalog = t.servicesCatalog;
+  const process = t.servicesProcess;
 
-  const [active, setActive] = useState<Category>("Todos");
+  // id de categoría (independiente del idioma); "all" = sin filtro
+  const [active, setActive] = useState<string>("all");
+
+  const categoryLabel = (id: string) =>
+    servicesPage.categories.find((c) => c.id === id)?.label ?? id;
 
   const filtered = useMemo(() => {
-    if (active === "Todos") return catalog;
+    if (active === "all") return catalog;
     return catalog.filter((s) => s.category === active);
   }, [active, catalog]);
 
@@ -83,8 +86,8 @@ export default function Services() {
               asChild
               className="group bg-[hsl(var(--primary))] text-white hover:opacity-95 shadow-[0_14px_45px_hsl(var(--primary)/0.22)]"
             >
-              <Link to={servicesPage.primaryCta.href}>
-                {servicesPage.primaryCta.label}
+              <Link to="/contacto">
+                {servicesPage.primaryCta}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Link>
             </Button>
@@ -94,7 +97,7 @@ export default function Services() {
   variant="outline"
   className="border-white/25 text-white bg-white/5 hover:bg-white/10 hover:text-white"
 >
-  <a href={servicesPage.secondaryCta.href}>{servicesPage.secondaryCta.label}</a>
+  <Link to="/servicios">{servicesPage.secondaryCta}</Link>
 </Button>
           </div>
         </div>
@@ -112,17 +115,17 @@ export default function Services() {
 
           <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
             <Filter className="h-4 w-4" />
-            <span>Filtrar</span>
+            <span>{servicesPage.filterLabel}</span>
           </div>
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2">
           {servicesPage.categories.map((c) => {
-            const is = c === active;
+            const is = c.id === active;
             return (
               <button
-                key={c}
-                onClick={() => setActive(c)}
+                key={c.id}
+                onClick={() => setActive(c.id)}
                 className={[
                   "rounded-full px-4 py-2 text-sm font-medium transition",
                   "border",
@@ -131,7 +134,7 @@ export default function Services() {
                     : "bg-transparent text-foreground border-border hover:bg-muted/30",
                 ].join(" ")}
               >
-                {c}
+                {c.label}
               </button>
             );
           })}
@@ -163,7 +166,7 @@ export default function Services() {
                   <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/5 border border-white/10">
                     {iconByCategory(service.category)}
                   </span>
-                  <span className="text-xs text-white/70 tracking-[0.18em] uppercase">{service.category}</span>
+                  <span className="text-xs text-white/70 tracking-[0.18em] uppercase">{categoryLabel(service.category)}</span>
                 </div>
               </div>
 
@@ -183,8 +186,8 @@ export default function Services() {
                 <div className="mt-5 flex items-center justify-between gap-3 border-t border-white/10 pt-4">
                   <p className="text-sm text-white/70">{service.price}</p>
                   <Button asChild className="group bg-[hsl(var(--primary))] text-white hover:opacity-95">
-                    <Link to={`/contacto?servicio=${encodeURIComponent(service.title)}`}>
-                      Solicitar
+                    <Link to={`/contacto?servicio=${encodeURIComponent(service.category)}`}>
+                      {servicesPage.request}
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                     </Link>
                   </Button>
@@ -251,8 +254,8 @@ export default function Services() {
                 size="lg"
                 className="group bg-[hsl(var(--primary))] text-white hover:opacity-95 shadow-[0_14px_45px_hsl(var(--primary)/0.22)]"
               >
-                <Link to={servicesPage.ctaPrimary.href}>
-                  {servicesPage.ctaPrimary.label}
+                <Link to="/contacto">
+                  {servicesPage.ctaPrimary}
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-0.5" />
                 </Link>
               </Button>
@@ -262,7 +265,7 @@ export default function Services() {
   variant="outline"
   className="border-white/25 text-white bg-white/5 hover:bg-white/10 hover:text-white"
 >
-  <a href={servicesPage.secondaryCta.href}>{servicesPage.secondaryCta.label}</a>
+  <Link to="/servicios">{servicesPage.secondaryCta}</Link>
 </Button>
             </div>
           </div>

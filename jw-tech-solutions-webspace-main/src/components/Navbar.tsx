@@ -2,20 +2,23 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
+  const { t } = useLanguage();
 
   const navItems = useMemo(
     () => [
-      { name: "Inicio", path: "/" },
-      { name: "Nosotros", path: "/nosotros" },
-      { name: "Servicios", path: "/servicios" },
-      { name: "Contacto", path: "/contacto" },
+      { name: t.nav.home, path: "/" },
+      { name: t.nav.about, path: "/nosotros" },
+      { name: t.nav.services, path: "/servicios" },
+      { name: t.nav.contact, path: "/contacto" },
     ],
-    []
+    [t]
   );
 
   const isActive = (path: string) => location.pathname === path;
@@ -65,7 +68,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-2">
             {navItems.map((item) => (
               <Link
-                key={item.name}
+                key={item.path}
                 to={item.path}
                 className={[
                   "relative rounded-xl px-4 py-2 text-sm font-medium transition",
@@ -80,22 +83,26 @@ const Navbar = () => {
               </Link>
             ))}
 
+            <LanguageSwitcher className="ml-2" />
+
             <Link to="/contacto" className="ml-2">
               <Button className="group bg-[hsl(var(--primary))] text-white hover:opacity-95 shadow-[0_10px_30px_hsl(var(--primary)/0.25)]">
-                Cotizar Proyecto
+                {t.nav.cta}
                 <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </Link>
           </div>
 
-          {/* Mobile button */}
-          <div className="md:hidden">
+          {/* Mobile: language switcher + menu button */}
+          <div className="md:hidden flex items-center gap-2">
+            <LanguageSwitcher />
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsOpen((v) => !v)}
               className="text-white hover:bg-white/10"
-              aria-label="Open menu"
+              aria-label={t.nav.openMenu}
+              aria-expanded={isOpen}
             >
               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </Button>
@@ -109,7 +116,7 @@ const Navbar = () => {
               <div className="p-3 flex flex-col gap-1">
                 {navItems.map((item) => (
                   <Link
-                    key={item.name}
+                    key={item.path}
                     to={item.path}
                     className={[
                       "rounded-xl px-4 py-3 text-sm font-medium transition",
@@ -124,7 +131,7 @@ const Navbar = () => {
 
                 <Link to="/contacto" className="mt-2">
                   <Button className="w-full group bg-[hsl(var(--primary))] text-white hover:opacity-95">
-                    Cotizar Proyecto
+                    {t.nav.cta}
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   </Button>
                 </Link>
