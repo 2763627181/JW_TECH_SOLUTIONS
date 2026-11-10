@@ -57,11 +57,6 @@ const Navbar = () => {
               <div className="absolute -inset-2 rounded-full bg-[hsl(var(--primary))]/20 blur-xl" />
               <img src="/logo-jw.png" alt="JW Tech Solutions" className="relative h-12 w-auto" />
             </div>
-
-            <div className="hidden sm:block leading-tight">
-              <p className="text-sm font-semibold tracking-wide text-white">JW TECH</p>
-              <p className="text-xs text-white/60">Solutions</p>
-            </div>
           </Link>
 
           {/* Desktop nav */}
